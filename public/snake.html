@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="./styles/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <h1 class="title">Message from your 2025 Snake</h1>
+
+    <label for="snake_type">Choose a Snake:</label>
+    <select name="snakeSelect" id="snake_type">
+      <option value="mini-snake">Baby Snake</option>
+      <option value="snake-block">Blocky Snake</option>
+      <option value="snake-moving">Slithering Snake</option>
+      <option value="snake-moving-dot">Dotted Snake</option>
+      <option value="snake-sitting">Coiled Snake</option>
+      <option value="snake-sideways">Cartoonish Snake</option>
+    </select>
+
+    <label for="fortune_type">Choose a message:</label>
+    <select name="fortuneSelect" id="fortune_type">
+      <option value="fortunes">Today's Fortune</option>
+      <option value="riddles">Riddles</option>
+      <option value="love">Love</option>
+      <option value="food">Food</option>
+      <option value="literature">Literature</option>
+      <option value="wisdom">Wisdom</option>
+    </select>
+
+    <button id="executeBtn">Create the snake's message</button>
+
+    <main class="output_container">
+      <div id="output"></div>
+    </main>
+
+    <section class="message_container">
+      <textarea name="userMessage" id="userMessageContainer"></textarea>
+      <button type="button" type="click" id="saveUserBtn">
+        Save your message
+      </button>
+    </section>
+
+    <script>
+      document
+        .getElementById("executeBtn")
+        .addEventListener("click", function () {
+          const snakeType = document.querySelector("#snake_type").value;
+          const fortuneType = document.querySelector("#fortune_type").value;
+
+          if (!snakeType || !fortuneType) {
+            alert("모든 옵션을 선택하세요.");
+            return;
+          }
+
+          let command = `fortune -s ${fortuneType} | cowsay -f ${snakeType}`;
+          console.log(command);
+
+          axios
+            .get(`/app`, {
+              params: { cmd: command },
+            })
+            .then((response) => {
+              document.getElementById(
+                "output"
+              ).innerHTML = `<pre>${response.data}</pre>`;
+            })
+            .catch((error) => {
+              const errorMessage = error.response
+                ? error.response.data
+                : "서버와 통신 중 문제가 발생했습니다.";
+              document.getElementById("output").innerText = errorMessage;
+            });
+        });
+
+      document
+        .getElementById("saveUserBtn")
+        .addEventListener("click", function (e) {
+          let userMessage = document.getElementById(
+            "userMessageContainer"
+          ).value;
+          if (!userMessage) {
+            alert("Please enter a message.");
+            return;
+          }
+          console.log(e);
+
+          let snakeType = document.querySelector("#snake_type").value; // 선택된 snake 옵션
+
+          let command = `cowsay -f ${snakeType} "${userMessage.trim()}"`;
+
+          axios
+            .get(`/app`, {
+              params: { cmd: command },
+            })
+            .then((response) => {
+              document.getElementById(
+                "output"
+              ).innerHTML = `<pre>${response.data}</pre>`;
+            })
+            .catch((error) => {
+              const errorMessage = error.response
+                ? error.response.data
+                : "서버와 통신 중 문제가 발생했습니다.";
+              document.getElementById("output").innerText = errorMessage;
+            });
+        });
+    </script>
+  </body>
+</html>
